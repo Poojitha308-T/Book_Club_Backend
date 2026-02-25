@@ -1,4 +1,5 @@
 const usersService = require("./users.service");
+const supabase = require("../../config/supabaseClient");
 
 exports.getCurrentUser = async (req, res) => {
   try {
@@ -12,7 +13,7 @@ exports.getCurrentUser = async (req, res) => {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });
   }
-  console.log("Decoded token:", req.user);
+  // console.log("Decoded token:", req.user);
 };
 
 exports.updateCurrentUser = async (req, res) => {
@@ -40,5 +41,27 @@ exports.getUserById = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, role, created_at");
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      users: data
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 };
