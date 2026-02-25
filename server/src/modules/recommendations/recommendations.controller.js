@@ -2,9 +2,11 @@ const recommendationService = require("./recommendations.service");
 
 exports.getRecommendations = async (req, res) => {
   try {
-    const userId = req.user.id; // from JWT middleware
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
 
-    const data = await recommendationService.getRecommendations(userId);
+    const data = await recommendationService.getRecommendations(userId, limit, page);
 
     res.json({
       success: true,

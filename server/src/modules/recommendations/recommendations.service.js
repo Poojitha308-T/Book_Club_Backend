@@ -1,10 +1,10 @@
 const pool = require("../../config/db");
 
-exports.getRecommendations = async (userId) => {
+exports.getRecommendations = async (userId, limit = 10, page = 1) => {
   try {
     console.log("User ID:", userId);
 
-    // 1️⃣ Get user's top genres
+    // 1️⃣ Favorite genres
     const genreResult = await pool.query(`
       SELECT COALESCE(b.genre,'General') AS genre,
              ROUND(AVG(r.rating),2) AS avg_rating
@@ -19,18 +19,17 @@ exports.getRecommendations = async (userId) => {
     const favoriteGenres = genreResult.rows.map(row => row.genre);
     console.log("Favorite Genres:", favoriteGenres.length ? favoriteGenres : ["General"]);
 
-    // 2️⃣ Library books
+    // 2️⃣ Books in library
     const libraryResult = await pool.query(`
       SELECT book_id FROM library WHERE user_id = $1
     `, [userId]);
     const libraryBookIds = libraryResult.rows.map(r => r.book_id);
     console.log("Books in Library:", libraryBookIds);
 
-    // 3️⃣ Hybrid recommendation
+    const offset = (page - 1) * limit;
     let recommendationsResult;
 
     if (favoriteGenres.length > 0) {
-      // b.genre fallback + exclude books in library if any
       const notInClause = libraryBookIds.length ? `AND b.id NOT IN (${libraryBookIds.join(",")})` : "";
       recommendationsResult = await pool.query(`
         SELECT b.id, b.title, b.author, COALESCE(b.genre,'General') AS genre,
@@ -41,19 +40,20 @@ exports.getRecommendations = async (userId) => {
         WHERE 1=1 ${notInClause}
         GROUP BY b.id
         ORDER BY genre_match DESC, average_rating DESC, b.created_at DESC
-        LIMIT 10;
-      `, [favoriteGenres]);
+        LIMIT $2 OFFSET $3;
+      `, [favoriteGenres, limit, offset]);
     } else {
-      // fallback if favoriteGenres is empty
+      const notInClause = libraryBookIds.length ? `WHERE b.id NOT IN (${libraryBookIds.join(",")})` : "";
       recommendationsResult = await pool.query(`
         SELECT b.id, b.title, b.author, COALESCE(b.genre,'General') AS genre,
                ROUND(COALESCE(AVG(r.rating),0),2)::FLOAT AS average_rating
         FROM books b
         LEFT JOIN reviews r ON b.id = r.book_id
+        ${notInClause}
         GROUP BY b.id
         ORDER BY average_rating DESC, b.created_at DESC
-        LIMIT 10;
-      `);
+        LIMIT $1 OFFSET $2;
+      `, [limit, offset]);
     }
 
     console.log("Recommendations Found:", recommendationsResult.rows.length);
