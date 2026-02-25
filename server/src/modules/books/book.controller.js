@@ -1,4 +1,5 @@
 const bookService = require("./book.service");
+const supabase = require("../../config/supabaseClient");
 
 exports.createBook = async (req, res) => {
   try {
@@ -16,16 +17,41 @@ exports.createBook = async (req, res) => {
 
 exports.getAllBooks = async (req, res) => {
   try {
-    const books = await bookService.getAllBooks();
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const from = (page - 1) * limit;
+    const to = page * limit - 1;
+
+    let query = supabase
+      .from("books")
+      .select("*", { count: "exact" });
+
+    // 🔍 Search filter
+    if (search) {
+      query = query.ilike("title", `%${search}%`);
+    }
+
+    const { data, error, count } = await query.range(from, to);
+
+    if (error) throw error;
 
     res.json({
       success: true,
-      books,
+      page,
+      limit,
+      total: count,
+      totalPages: Math.ceil(count / limit),
+      books: data
     });
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Server error"
     });
   }
 };
