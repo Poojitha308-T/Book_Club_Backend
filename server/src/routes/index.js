@@ -4,6 +4,7 @@ const votingRoutes = require("../modules/voting/voting.routes");
 const discussionsRoutes = require("../modules/discussions/discussions.routes");
 const progressRoutes = require("../modules/progress/progress.routes");
 const goalsRoutes = require("../modules/goals/goals.routes");
+const libraryRoutes = require("../modules/library/library.routes");
 
 router.use("/auth", require("../modules/auth/auth.routes"));
 router.use("/books", require("../modules/books/book.routes"));
@@ -12,5 +13,6 @@ router.use("/voting", votingRoutes);
 router.use("/discussions", discussionsRoutes);
 router.use("/progress", progressRoutes);
 router.use("/goals", goalsRoutes);
+router.use("/library", libraryRoutes);
 
 module.exports = router;
