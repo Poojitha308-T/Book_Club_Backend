@@ -4,69 +4,67 @@ exports.getRecommendations = async (userId) => {
   try {
     console.log("User ID:", userId);
 
-    // 1️⃣ Find user's top-rated genres
+    // 1️⃣ Get user's top genres
     const genreResult = await pool.query(`
-      SELECT b.genre,
+      SELECT COALESCE(b.genre,'General') AS genre,
              ROUND(AVG(r.rating),2) AS avg_rating
       FROM reviews r
       JOIN books b ON r.book_id = b.id
       WHERE r.user_id = $1
-        AND b.genre IS NOT NULL
-      GROUP BY b.genre
+      GROUP BY COALESCE(b.genre,'General')
       ORDER BY avg_rating DESC
       LIMIT 3;
     `, [userId]);
 
-    let favoriteGenres = [];
-    if (genreResult.rows.length > 0) {
-      favoriteGenres = genreResult.rows.map(row => row.genre);
-    }
+    const favoriteGenres = genreResult.rows.map(row => row.genre);
+    console.log("Favorite Genres:", favoriteGenres.length ? favoriteGenres : ["General"]);
 
-    console.log("Favorite Genres:", favoriteGenres);
+    // 2️⃣ Library books
+    const libraryResult = await pool.query(`
+      SELECT book_id FROM library WHERE user_id = $1
+    `, [userId]);
+    const libraryBookIds = libraryResult.rows.map(r => r.book_id);
+    console.log("Books in Library:", libraryBookIds);
 
-    // 2️⃣ Recommend books
+    // 3️⃣ Hybrid recommendation
     let recommendationsResult;
 
     if (favoriteGenres.length > 0) {
-      // Use favorite genres
+      // b.genre fallback + exclude books in library if any
+      const notInClause = libraryBookIds.length ? `AND b.id NOT IN (${libraryBookIds.join(",")})` : "";
       recommendationsResult = await pool.query(`
-        SELECT b.id, b.title, b.author, b.genre,
-               ROUND(COALESCE(AVG(r.rating),0),2)::FLOAT AS average_rating
+        SELECT b.id, b.title, b.author, COALESCE(b.genre,'General') AS genre,
+               ROUND(COALESCE(AVG(r.rating),0),2)::FLOAT AS average_rating,
+               CASE WHEN COALESCE(b.genre,'General') = ANY($1) THEN 1 ELSE 0 END AS genre_match
         FROM books b
         LEFT JOIN reviews r ON b.id = r.book_id
-        WHERE b.genre = ANY($1)
-          AND b.id NOT IN (
-            SELECT book_id FROM library WHERE user_id = $2
-          )
+        WHERE 1=1 ${notInClause}
         GROUP BY b.id
-        ORDER BY average_rating DESC
+        ORDER BY genre_match DESC, average_rating DESC, b.created_at DESC
         LIMIT 10;
-      `, [favoriteGenres, userId]);
+      `, [favoriteGenres]);
     } else {
-      // No ratings yet — just top-rated books across all genres
+      // fallback if favoriteGenres is empty
       recommendationsResult = await pool.query(`
-        SELECT b.id, b.title, b.author, b.genre,
+        SELECT b.id, b.title, b.author, COALESCE(b.genre,'General') AS genre,
                ROUND(COALESCE(AVG(r.rating),0),2)::FLOAT AS average_rating
         FROM books b
         LEFT JOIN reviews r ON b.id = r.book_id
-        WHERE b.id NOT IN (
-          SELECT book_id FROM library WHERE user_id = $1
-        )
         GROUP BY b.id
-        ORDER BY average_rating DESC
+        ORDER BY average_rating DESC, b.created_at DESC
         LIMIT 10;
-      `, [userId]);
+      `);
     }
 
     console.log("Recommendations Found:", recommendationsResult.rows.length);
 
     return {
-      favoriteGenres,
+      favoriteGenres: favoriteGenres.length ? favoriteGenres : ["General"],
       recommendations: recommendationsResult.rows
     };
 
   } catch (err) {
-    console.error("Recommendation Service Error:", err);
+    console.error("Hybrid Recommendation Service Error:", err);
     return {
       favoriteGenres: [],
       recommendations: [],
