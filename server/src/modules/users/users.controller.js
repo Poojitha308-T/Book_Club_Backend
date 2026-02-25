@@ -12,6 +12,7 @@ exports.getCurrentUser = async (req, res) => {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });
   }
+  console.log("Decoded token:", req.user);
 };
 
 exports.updateCurrentUser = async (req, res) => {
