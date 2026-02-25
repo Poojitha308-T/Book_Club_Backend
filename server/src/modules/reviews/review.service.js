@@ -1,4 +1,4 @@
-const pool = require("../../config/supabaseClient");
+const pool = require("../../config/db");
 
 exports.addReview = async ({ bookId, userId, rating, comment }) => {
   if (!rating || rating < 1 || rating > 5) {

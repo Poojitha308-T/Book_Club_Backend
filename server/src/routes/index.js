@@ -14,5 +14,6 @@ router.use("/discussions", discussionsRoutes);
 router.use("/progress", progressRoutes);
 router.use("/goals", goalsRoutes);
 router.use("/library", libraryRoutes);
+router.use("/users", require("../modules/users/users.routes"));
 
 module.exports = router;
