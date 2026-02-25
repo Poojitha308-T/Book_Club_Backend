@@ -1,3 +1,4 @@
+const pool = require("../../config/db");
 exports.getRecommendations = async (userId) => {
   // 1 Find user's highest-rated genre
   const genreResult = await pool.query(`

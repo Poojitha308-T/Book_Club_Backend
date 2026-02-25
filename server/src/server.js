@@ -1,10 +1,5 @@
-const express = require("express");
 require("dotenv").config();
-
-const app = express();
-
-app.use(express.json());
-
+const app = require("./app");
 // Routes
 app.use("/api/auth", require("./modules/auth/auth.routes"));
 app.use("/api/books", require("./modules/books/book.routes"));
