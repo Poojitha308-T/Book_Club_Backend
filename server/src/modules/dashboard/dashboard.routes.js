@@ -18,9 +18,6 @@ router.get("/progress", verifyToken, verifyAdmin, dashboardController.getProgres
 // Goals overview
 router.get("/goals", verifyToken, verifyAdmin, dashboardController.getGoals);
 
-// Reports / flagged content
-router.get("/reports", verifyToken, verifyAdmin, dashboardController.getReports);
-
 
 console.log("Dashboard Routes Loaded");
 
