@@ -6,6 +6,10 @@ const progressRoutes = require("../modules/progress/progress.routes");
 const goalsRoutes = require("../modules/goals/goals.routes");
 const libraryRoutes = require("../modules/library/library.routes");
 const achievementsRoutes = require("../modules/achievements/achievements.routes");
+const meetingsRoutes = require("../modules/meetings/meetings.routes");
+const notificationsRoutes = require("../modules/notifications/notifications.routes");
+
+
 
 router.use("/auth", require("../modules/auth/auth.routes"));
 router.use("/books", require("../modules/books/book.routes"));
@@ -20,5 +24,8 @@ router.use("/feed", require("../modules/feed/feed.routes"));
 router.use("/reviews", require("../modules/likes/likes.routes"));
 router.use("/dashboard", require("../modules/dashboard/dashboard.routes"));
 router.use("/achievements", achievementsRoutes);
+router.use("/meetings", meetingsRoutes);
+router.use("/notifications", notificationsRoutes);
+
 
 module.exports = router;
