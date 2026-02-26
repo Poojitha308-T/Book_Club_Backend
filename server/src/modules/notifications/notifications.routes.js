@@ -12,4 +12,6 @@ router.patch("/:notificationId/read", verifyToken, notificationsController.markA
 // Create a notification (admin only)
 router.post("/", verifyToken, notificationsController.createNotification);
 
+router.delete("/:id", verifyToken, notificationsController.deleteNotification);
+
 module.exports = router;
