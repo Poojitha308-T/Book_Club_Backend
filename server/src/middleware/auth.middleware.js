@@ -24,14 +24,36 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-const verifyAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({
+const verifyAdmin = async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", req.user.id)
+      .single();
+
+    if (error || !data) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied."
+      });
+    }
+
+    if (data.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admins only."
+      });
+    }
+
+    next();
+
+  } catch (err) {
+    return res.status(500).json({
       success: false,
-      message: "Access denied. Admins only."
+      message: "Server error"
     });
   }
-  next();
 };
 
 module.exports = {
