@@ -1,5 +1,6 @@
 const bookService = require("./book.service");
 const supabase = require("../../config/supabaseClient");
+const allowedSortFields = ["created_at", "title", "rating"];
 
 exports.createBook = async (req, res) => {
   try {
@@ -17,41 +18,66 @@ exports.createBook = async (req, res) => {
 
 exports.getAllBooks = async (req, res) => {
   try {
-    let { page = 1, limit = 10, search = "" } = req.query;
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      sort = "created_at",
+      order = "desc",
+      genre,
+      minRating,
+    } = req.query;
 
     page = parseInt(page);
-    limit = parseInt(limit);
+    limit = Math.min(parseInt(limit), 50); // safety limit
 
     const from = (page - 1) * limit;
     const to = page * limit - 1;
 
-    let query = supabase
-      .from("books")
-      .select("*", { count: "exact" });
+    let query = supabase.from("books").select("*", { count: "exact" });
 
-    // 🔍 Search filter
+    // 🔍 Search (title or author)
     if (search) {
-      query = query.ilike("title", `%${search}%`);
+      query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
     }
 
+    // 🎭 Filter by genre
+    if (genre) {
+      query = query.eq("genre", genre);
+    }
+
+    // ⭐ Filter by minimum rating
+    if (minRating) {
+      query = query.gte("rating", minRating);
+    }
+
+    if (!allowedSortFields.includes(sort)) {
+      sort = "created_at";
+    }
+
+    // 🔄 Sorting
+    query = query.order(sort, { ascending: order === "asc" });
+
+    // 📄 Pagination
     const { data, error, count } = await query.range(from, to);
 
     if (error) throw error;
+
+    const totalPages = count === 0 ? 1 : Math.ceil(count / limit);
 
     res.json({
       success: true,
       page,
       limit,
       total: count,
-      totalPages: Math.ceil(count / limit),
-      books: data
+      totalPages,
+      books: data,
     });
-
   } catch (error) {
-    console.error(error);
+    console.error("Books fetch error:", error);
     res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server error",
     });
   }
 };
@@ -81,10 +107,7 @@ exports.getBookById = async (req, res) => {
 
 exports.updateBook = async (req, res) => {
   try {
-    const book = await bookService.updateBook(
-      req.params.id,
-      req.body
-    );
+    const book = await bookService.updateBook(req.params.id, req.body);
 
     if (!book) {
       return res.status(404).json({
