@@ -1,9 +1,27 @@
 const express = require("express");
 const router = express.Router();
-
-const { getDashboard } = require("./dashboard.controller");
+const dashboardController = require("./dashboard.controller");
 const { verifyToken, verifyAdmin } = require("../../middleware/auth.middleware");
 
-router.get("/", verifyToken, verifyAdmin, getDashboard);
+// General dashboard stats
+router.get("/", verifyToken, verifyAdmin, dashboardController.getDashboard);
+
+// Users management
+router.get("/users", verifyToken, verifyAdmin, dashboardController.getUsers);
+
+// Books management
+router.get("/books", verifyToken, verifyAdmin, dashboardController.getBooks);
+
+// Reading progress stats
+router.get("/progress", verifyToken, verifyAdmin, dashboardController.getProgress);
+
+// Goals overview
+router.get("/goals", verifyToken, verifyAdmin, dashboardController.getGoals);
+
+// Reports / flagged content
+router.get("/reports", verifyToken, verifyAdmin, dashboardController.getReports);
+
+
+console.log("Dashboard Routes Loaded");
 
 module.exports = router;

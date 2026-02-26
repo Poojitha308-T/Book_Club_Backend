@@ -69,3 +69,25 @@ exports.login = async ({ email, password }) => {
     },
   };
 };
+
+exports.logout = async (token) => {
+  if (!token) throw { status: 400, message: "Token required" };
+
+  const result = await pool.query(
+    `INSERT INTO token_blacklist (token, blacklisted_at)
+     VALUES ($1, NOW())
+     RETURNING *`,
+    [token]
+  );
+
+  return result.rows[0];
+};
+
+// Check if token is blacklisted
+exports.isBlacklisted = async (token) => {
+  const result = await pool.query(
+    `SELECT id FROM token_blacklist WHERE token = $1`,
+    [token]
+  );
+  return result.rows.length > 0;
+};

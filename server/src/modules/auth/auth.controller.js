@@ -28,3 +28,23 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+exports.logout = async (req, res) => {
+  try {
+    // Token from Authorization header
+    const authHeader = req.headers["authorization"];
+    if (!authHeader) return res.status(400).json({ success: false, message: "No token provided" });
+
+    const token = authHeader.split(" ")[1]; // Bearer <token>
+
+    await authService.logout(token);
+
+    res.json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Logout failed",
+    });
+  }
+};
