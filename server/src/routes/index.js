@@ -15,5 +15,7 @@ router.use("/progress", progressRoutes);
 router.use("/goals", goalsRoutes);
 router.use("/library", libraryRoutes);
 router.use("/users", require("../modules/users/users.routes"));
+router.use("/feed", require("../modules/feed/feed.routes"));
+router.use("/reviews", require("../modules/likes/likes.routes"));
 
 module.exports = router;
