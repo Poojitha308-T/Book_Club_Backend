@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const votingController = require("./voting.controller");
-const verifyToken = require("../../middleware/auth.middleware");
 
-router.post("/", verifyToken, votingController.vote);
-router.get("/", verifyToken, votingController.getVotes);
+const { vote, getVotes } = require("./voting.controller");
+const { verifyToken } = require("../../middleware/auth.middleware");
 
-console.log("Voting Routes Loaded");
+router.post("/", verifyToken, vote);
+
+router.get("/", getVotes);
+
 module.exports = router;

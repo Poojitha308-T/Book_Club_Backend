@@ -17,5 +17,6 @@ router.use("/library", libraryRoutes);
 router.use("/users", require("../modules/users/users.routes"));
 router.use("/feed", require("../modules/feed/feed.routes"));
 router.use("/reviews", require("../modules/likes/likes.routes"));
+router.use("/dashboard", require("../modules/dashboard/dashboard.routes"));
 
 module.exports = router;
