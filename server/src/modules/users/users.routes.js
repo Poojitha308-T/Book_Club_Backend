@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const usersController = require("./users.controller");
 const authMiddleware = require("../../middleware/auth.middleware");
-const verifyToken = require("../../middleware/auth.middleware");
+const { verifyToken } = require("../../middleware/auth.middleware");
 
 // Get logged-in user
 router.get("/me", authMiddleware, usersController.getCurrentUser);

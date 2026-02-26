@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const progressController = require("./progress.controller");
-const verifyToken = require("../../middleware/auth.middleware");
+const { verifyToken } = require("../../middleware/auth.middleware");
 
 // Add or update progress
 router.post("/", verifyToken, progressController.addOrUpdateProgress);

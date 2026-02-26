@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const libraryController = require("./library.controller");
-const verifyToken = require("../../middleware/auth.middleware");
+const { verifyToken } = require("../../middleware/auth.middleware");
 
 // Add a book
 router.post("/", verifyToken, libraryController.addBook);
