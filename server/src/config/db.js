@@ -11,11 +11,11 @@ const pool = new Pool({
 // Test connection once when server starts
 pool.connect()
   .then(client => {
-    console.log("✅ Database connected successfully");
+    console.log("Database connected successfully");
     client.release();
   })
   .catch(err => {
-    console.error("❌ Database connection failed");
+    console.error("Database connection failed");
     console.error(err.message);
   });
 

@@ -5,6 +5,7 @@ const discussionsRoutes = require("../modules/discussions/discussions.routes");
 const progressRoutes = require("../modules/progress/progress.routes");
 const goalsRoutes = require("../modules/goals/goals.routes");
 const libraryRoutes = require("../modules/library/library.routes");
+const achievementsRoutes = require("../modules/achievements/achievements.routes");
 
 router.use("/auth", require("../modules/auth/auth.routes"));
 router.use("/books", require("../modules/books/book.routes"));
@@ -18,5 +19,6 @@ router.use("/users", require("../modules/users/users.routes"));
 router.use("/feed", require("../modules/feed/feed.routes"));
 router.use("/reviews", require("../modules/likes/likes.routes"));
 router.use("/dashboard", require("../modules/dashboard/dashboard.routes"));
+router.use("/achievements", achievementsRoutes);
 
 module.exports = router;
