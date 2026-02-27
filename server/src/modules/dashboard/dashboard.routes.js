@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const dashboardController = require("./dashboard.controller");
-const { verifyToken, verifyAdmin } = require("../../middleware/auth.middleware");
+const { verifyToken, verifyAdmin, verifyRoles } = require("../../middleware/auth.middleware");
 
 // General dashboard stats
-router.get("/", verifyToken, verifyAdmin, dashboardController.getDashboard);
+router.get("/dashboard", verifyToken, dashboardController.getDashboard);
 
 // Users management
 router.get("/users", verifyToken, verifyAdmin, dashboardController.getUsers);

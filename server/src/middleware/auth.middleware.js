@@ -1,51 +1,33 @@
+// src/middleware/auth.middleware.js
 const jwt = require("jsonwebtoken");
 const authService = require("../modules/auth/auth.service");
 
-module.exports = async (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader) return res.status(401).json({ success: false, message: "No token provided" });
-
-  const token = authHeader.split(" ")[1];
-
-
-  // Check if token is blacklisted
-  const blacklisted = await authService.isBlacklisted(token);
-  if (blacklisted) return res.status(401).json({ success: false, message: "Token expired. Please login again." });
-
+// Middleware to verify JWT token and attach user to req
+const verifyToken = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({ success: false, message: "Invalid token" });
-  }
-};
-
-
-const verifyToken = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({ message: "Access denied. No token provided." });
-    }
+    const authHeader = req.headers["authorization"];
+    if (!authHeader)
+      return res.status(401).json({ success: false, message: "No token provided" });
 
     const token = authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ success: false, message: "Invalid token format" });
 
-    if (!token) {
-      return res.status(401).json({ message: "Invalid token format." });
-    }
+    // Check if token is blacklisted
+    const blacklisted = await authService.isBlacklisted(token);
+    if (blacklisted)
+      return res.status(401).json({ success: false, message: "Token expired. Please login again." });
 
+    // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = decoded;
-
+    req.user = decoded; // attach user info to request
     next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token." });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ success: false, message: "Invalid or expired token" });
   }
 };
 
+// Optional: Admin-only check
 const verifyAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ success: false, message: "Access denied. Admins only." });
@@ -53,4 +35,16 @@ const verifyAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { verifyToken, verifyAdmin };
+// Optional: Allow only certain roles
+const verifyRoles = (...allowedRoles) => (req, res, next) => {
+  if (!req.user || !allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Access denied." });
+  }
+  next();
+};
+
+module.exports = {
+  verifyToken,
+  verifyAdmin,
+  verifyRoles,
+};

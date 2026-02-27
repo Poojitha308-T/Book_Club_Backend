@@ -22,7 +22,7 @@ router.use("/library", libraryRoutes);
 router.use("/users", require("../modules/users/users.routes"));
 router.use("/feed", require("../modules/feed/feed.routes"));
 router.use("/reviews", require("../modules/likes/likes.routes"));
-router.use("/dashboard", require("../modules/dashboard/dashboard.routes"));
+router.use("/", require("../modules/dashboard/dashboard.routes"));
 router.use("/achievements", achievementsRoutes);
 router.use("/meetings", meetingsRoutes);
 router.use("/notifications", notificationsRoutes);
