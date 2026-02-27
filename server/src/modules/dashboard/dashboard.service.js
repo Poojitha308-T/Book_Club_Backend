@@ -2,11 +2,11 @@ const supabase = require("../../config/supabaseClient");
 
 exports.getDashboardStats = async () => {
   const [
-    users,
-    books,
-    reviews,
-    discussions,
-    votes
+    usersRes,
+    booksRes,
+    reviewsRes,
+    discussionsRes,
+    votesRes
   ] = await Promise.all([
     supabase.from("users").select("*", { count: "exact", head: true }),
     supabase.from("books").select("*", { count: "exact", head: true }),
@@ -15,11 +15,18 @@ exports.getDashboardStats = async () => {
     supabase.from("votes").select("*", { count: "exact", head: true })
   ]);
 
+  // 🔥 Error handling
+  if (usersRes.error) throw usersRes.error;
+  if (booksRes.error) throw booksRes.error;
+  if (reviewsRes.error) throw reviewsRes.error;
+  if (discussionsRes.error) throw discussionsRes.error;
+  if (votesRes.error) throw votesRes.error;
+
   return {
-    totalUsers: users.count || 0,
-    totalBooks: books.count || 0,
-    totalReviews: reviews.count || 0,
-    totalDiscussions: discussions.count || 0,
-    totalVotes: votes.count || 0
+    totalUsers: usersRes.count || 0,
+    totalBooks: booksRes.count || 0,
+    totalReviews: reviewsRes.count || 0,
+    totalDiscussions: discussionsRes.count || 0,
+    totalVotes: votesRes.count || 0
   };
 };

@@ -4,16 +4,19 @@ exports.getDashboard = async (req, res) => {
   try {
     console.log("DEBUG: req.user in controller:", req.user);
 
-    // Example dashboard query
-    const dashboardData = {
-      totalUsers: 100,
-      totalBooks: 50,
-    };
+    const dashboardData = await dashboardService.getDashboardStats();
 
-    res.json({ success: true, data: dashboardData });
+    res.json({
+      success: true,
+      data: dashboardData,
+    });
+
   } catch (error) {
     console.error("Dashboard Controller Error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
