@@ -8,8 +8,8 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin:["http://localhost:5173",
-    "https://fluffy-bubblegum-5fd360.netlify.app"],
+    origin:"http://localhost:5173",
+    // "https://fluffy-bubblegum-5fd360.netlify.app"],
     credentials: true,
   })
 );
