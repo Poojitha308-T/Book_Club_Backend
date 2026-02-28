@@ -15,6 +15,11 @@ app.use(
   })
 );
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Book Club Backend is running ",
+  });
+});
 
 app.use("/api", routes);   // Central routing
 
