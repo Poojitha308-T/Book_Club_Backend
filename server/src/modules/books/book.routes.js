@@ -6,7 +6,7 @@ const { verifyToken } = require("../../middleware/auth.middleware");
 const allowRoles = require("../../middleware/role.middleware");
 const reviewRoutes = require("../reviews/review.routes");
 
-router.post("/", verifyToken, bookController.createBook);
+router.post("/", verifyToken, allowRoles("admin"), bookController.createBook);
 
 router.get("/", bookController.getAllBooks);
 

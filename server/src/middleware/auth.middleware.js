@@ -1,46 +1,65 @@
-// src/middleware/auth.middleware.js
+
 const jwt = require("jsonwebtoken");
 const authService = require("../modules/auth/auth.service");
 
-// Middleware to verify JWT token and attach user to req
+/**
+ * Middleware to verify JWT token and attach user info to req.user
+ */
 const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    if (!authHeader)
+    if (!authHeader) {
       return res.status(401).json({ success: false, message: "No token provided" });
+    }
 
-    const token = authHeader.split(" ")[1];
-    if (!token) return res.status(401).json({ success: false, message: "Invalid token format" });
+    const tokenParts = authHeader.split(" ");
+    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
+      return res.status(401).json({ success: false, message: "Invalid token format" });
+    }
+
+    const token = tokenParts[1];
 
     // Check if token is blacklisted
     const blacklisted = await authService.isBlacklisted(token);
-    if (blacklisted)
-      return res.status(401).json({ success: false, message: "Token expired. Please login again." });
+    if (blacklisted) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Token expired. Please login again." });
+    }
 
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // attach user info to request
+    req.user = decoded; // Attach user info to request
     next();
   } catch (err) {
-    console.error(err);
+    console.error("verifyToken error:", err);
     return res.status(401).json({ success: false, message: "Invalid or expired token" });
   }
 };
 
-// Optional: Admin-only check
+/**
+ * Middleware to allow only admins
+ */
 const verifyAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Access denied. Admins only." });
+    return res
+      .status(403)
+      .json({ success: false, message: "Access denied. Admins only." });
   }
   next();
 };
 
-// Optional: Allow only certain roles
-const verifyRoles = (...allowedRoles) => (req, res, next) => {
-  if (!req.user || !allowedRoles.includes(req.user.role)) {
-    return res.status(403).json({ success: false, message: "Access denied." });
-  }
-  next();
+/**
+ * Middleware to allow only certain roles
+ * Example usage: verifyRoles('admin', 'moderator')
+ */
+const verifyRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Access denied." });
+    }
+    next();
+  };
 };
 
 module.exports = {
