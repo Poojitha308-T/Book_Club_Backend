@@ -23,6 +23,8 @@ router.delete(
 
 router.use("/:bookId/reviews", reviewRoutes);
 
+router.get("/top-votes", verifyToken, bookController.getTopVotedBooks);
+
 console.log("verifyToken:", verifyToken);
 console.log("createBook:", bookController.createBook);
 

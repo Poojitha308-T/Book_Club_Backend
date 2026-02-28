@@ -143,3 +143,14 @@ exports.deleteBook = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.getTopVotedBooks = async (req, res) => {
+  try {
+    const topBooks = await bookService.getTopVotedBooks(); // implement in service
+    res.json({ success: true, data: topBooks });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
