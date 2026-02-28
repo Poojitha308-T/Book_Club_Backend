@@ -65,3 +65,16 @@ exports.getAllUsers = async (req, res) => {
     });
   }
 };
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.query("DELETE FROM users WHERE id = $1", [id]);
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to delete user" });
+  }
+};
