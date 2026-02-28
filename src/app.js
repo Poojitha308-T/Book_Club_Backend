@@ -8,11 +8,11 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:5173"
-    //   "https://your-frontend-domain.com",
+      "http://localhost:5173",
+      "https://fluffy-bubblegum-5fd360.netlify.app/",
     ],
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.get("/", (req, res) => {
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api", routes);   // Central routing
+app.use("/api", routes); // Central routing
 
 app.use(errorMiddleware);
 
