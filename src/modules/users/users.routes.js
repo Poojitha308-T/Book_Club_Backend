@@ -34,7 +34,7 @@ router.put(
   "/:id/role",
   verifyToken,
   verifyRoles("admin"),
-  usersController.updateCurrentUser
+  usersController.updateUserRole
 );
 
 module.exports = router;

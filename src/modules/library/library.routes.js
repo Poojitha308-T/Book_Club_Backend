@@ -4,7 +4,7 @@ const libraryController = require("./library.controller");
 const { verifyToken } = require("../../middleware/auth.middleware");
 
 // Add a book
-router.post("/", verifyToken, libraryController.addBook);
+router.post("/", verifyToken, libraryController.addBookToLibrary);
 
 // Remove a book
 router.delete("/", verifyToken, libraryController.removeBook);

@@ -8,28 +8,33 @@ const authService = require("../modules/auth/auth.service");
 const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    if (!authHeader) {
-      return res.status(401).json({ success: false, message: "No token provided" });
-    }
+    if (!authHeader) return res.status(401).json({ success: false, message: "No token provided" });
 
     const tokenParts = authHeader.split(" ");
-    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
+    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer")
       return res.status(401).json({ success: false, message: "Invalid token format" });
-    }
 
     const token = tokenParts[1];
 
-    // Check if token is blacklisted
+    // Check blacklist
     const blacklisted = await authService.isBlacklisted(token);
-    if (blacklisted) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Token expired. Please login again." });
-    }
+    if (blacklisted) return res.status(401).json({ success: false, message: "Token expired. Please login again." });
 
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user info to request
+    if (!decoded?.id) return res.status(401).json({ success: false, message: "Invalid token" });
+
+    // Fetch user from Supabase to get role
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id, role")
+      .eq("id", decoded.id)
+      .single();
+
+    if (error || !user) return res.status(401).json({ success: false, message: "User not found" });
+
+    // Attach user info including role
+    req.user = { id: user.id, role: user.role };
     next();
   } catch (err) {
     console.error("verifyToken error:", err);

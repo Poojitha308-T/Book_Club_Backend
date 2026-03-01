@@ -1,25 +1,26 @@
 const libraryService = require("./library.service");
 
 // Add book
-exports.addBook = async (req, res) => {
+exports.addBookToLibrary = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { bookId } = req.body;
+    const { bookId, status } = req.body; // <-- get status from frontend
 
     if (!bookId)
       return res.status(400).json({ success: false, message: "Missing bookId" });
 
-    const book = await libraryService.addBookToLibrary(userId, bookId);
+    // Pass status to service
+    const book = await libraryService.addBookToLibrary(userId, bookId, status || "to_read");
+
     if (!book)
       return res.json({ success: true, message: "Book already in library" });
 
     res.json({ success: true, book });
   } catch (err) {
-    console.error(err);
+    console.error("Library add error:", err);
     res.status(500).json({ success: false, message: "Failed to add book" });
   }
 };
-
 // Remove book
 exports.removeBook = async (req, res) => {
   try {
