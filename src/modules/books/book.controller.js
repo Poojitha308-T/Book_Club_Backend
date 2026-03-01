@@ -4,7 +4,12 @@ const allowedSortFields = ["created_at", "title", "rating"];
 
 exports.createBook = async (req, res) => {
   try {
-    const book = await bookService.createBook(req.body, req.user.id);
+    const { title, author, description, genre, rating, image_url } = req.body;
+
+    const book = await bookService.createBook(
+      { title, author, description, genre, rating, image_url },
+      req.user.id
+    );
 
     res.status(201).json({
       message: "Book created successfully",

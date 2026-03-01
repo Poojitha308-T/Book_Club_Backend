@@ -49,3 +49,17 @@ exports.joinMeeting = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// meetings.controller.js
+exports.deleteMeeting = async (req, res) => {
+  try {
+    const deleted = await meetingsService.deleteMeeting(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Meeting not found" });
+    }
+    res.json({ success: true, message: "Meeting deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to delete meeting" });
+  }
+};

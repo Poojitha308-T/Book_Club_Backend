@@ -30,3 +30,13 @@ exports.joinMeeting = async ({ meeting_id, user_id }) => {
   );
   return result.rows[0];
 };
+
+
+// meeting.service.js
+exports.deleteMeeting = async (id) => {
+  const result = await pool.query(
+    `DELETE FROM meetings WHERE id = $1 RETURNING *`,
+    [id]
+  );
+  return result.rows[0]; // returns deleted row or undefined if not found
+};

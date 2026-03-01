@@ -1,5 +1,6 @@
 const usersService = require("./users.service");
 const supabase = require("../../config/supabaseClient");
+const pool = require("../../config/db");
 
 exports.getCurrentUser = async (req, res) => {
   try {
@@ -70,38 +71,76 @@ exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    await db.query("DELETE FROM users WHERE id = $1", [id]);
+    // Optional: prevent admin from deleting themselves
+    if (req.user.id === id) {
+      return res.status(400).json({
+        message: "You cannot delete yourself",
+      });
+    }
 
-    res.json({ message: "User deleted successfully" });
+    const result = await pool.query(
+      "DELETE FROM users WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to delete user" });
+    console.error("Delete User Error:", error);
+    res.status(500).json({
+      message: "Failed to delete user",
+    });
   }
 };
 
-// Update another user's role (admin only)
+// // Update another user's role (admin only)
 exports.updateUserRole = async (req, res) => {
   try {
-    const { id } = req.params;        // The user to update
-    const { role } = req.body;        // New role
+    const { id } = req.params;
+    const { role } = req.body;
 
-    if (!role || !["admin", "user"].includes(role)) {
-      return res.status(400).json({ success: false, message: "Invalid role" });
+    // Validate role
+    if (!role) {
+      return res.status(400).json({
+        message: "Role is required",
+      });
     }
 
-    // Update user role in Supabase
-    const { data, error } = await supabase
-      .from("users")
-      .update({ role })
-      .eq("id", id)
-      .select("id, name, email, role, created_at")
-      .single();
+    // Optional: prevent admin from changing their own role
+    if (req.user.id === id) {
+      return res.status(400).json({
+        message: "You cannot change your own role",
+      });
+    }
 
-    if (error || !data) throw error || new Error("Failed to update role");
+    const result = await pool.query(
+      "UPDATE users SET role = $1 WHERE id = $2 RETURNING *",
+      [role, id]
+    );
 
-    res.json({ success: true, user: data });
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "User role updated successfully",
+      user: result.rows[0],
+    });
+
   } catch (error) {
-    console.error("updateUserRole error:", error);
-    res.status(500).json({ success: false, message: "Failed to update user role" });
+    console.error("Update Role Error:", error);
+    res.status(500).json({
+      message: "Failed to update role",
+    });
   }
 };

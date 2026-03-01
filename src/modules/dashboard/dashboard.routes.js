@@ -4,7 +4,7 @@ const dashboardController = require("./dashboard.controller");
 const { verifyToken, verifyAdmin, verifyRoles } = require("../../middleware/auth.middleware");
 
 // General dashboard stats
-router.get("/dashboard", verifyToken, dashboardController.getDashboard);
+router.get("/", verifyToken, dashboardController.getDashboard);
 
 // Users management
 router.get("/users", verifyToken, verifyAdmin, dashboardController.getUsers);

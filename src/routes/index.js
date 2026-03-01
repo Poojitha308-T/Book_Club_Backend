@@ -21,7 +21,7 @@ router.use("/voting", require("../modules/voting/voting.routes"));
 router.use("/discussions", require("../modules/discussions/discussions.routes"));
 
 // Dashboard & Feed
-router.use("/", require("../modules/dashboard/dashboard.routes"));
+router.use("/dashboard", require("../modules/dashboard/dashboard.routes"));
 router.use("/feed", require("../modules/feed/feed.routes"));
 
 // Meetings, Notifications & Achievements

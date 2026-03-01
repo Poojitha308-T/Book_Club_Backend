@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const authService = require("../modules/auth/auth.service");
 
@@ -8,37 +7,39 @@ const authService = require("../modules/auth/auth.service");
 const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    if (!authHeader) return res.status(401).json({ success: false, message: "No token provided" });
+    if (!authHeader) {
+      return res
+        .status(401)
+        .json({ success: false, message: "No token provided" });
+    }
 
     const tokenParts = authHeader.split(" ");
-    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer")
-      return res.status(401).json({ success: false, message: "Invalid token format" });
-
+    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid token format" });
+    }
     const token = tokenParts[1];
 
     // Check blacklist
     const blacklisted = await authService.isBlacklisted(token);
-    if (blacklisted) return res.status(401).json({ success: false, message: "Token expired. Please login again." });
+    if (blacklisted) {
+      return res.status(401).json({
+        success: false,
+        message: "Token expired. Please login again.",
+      });
+    }
 
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded?.id) return res.status(401).json({ success: false, message: "Invalid token" });
-
-    // Fetch user from Supabase to get role
-    const { data: user, error } = await supabase
-      .from("users")
-      .select("id, role")
-      .eq("id", decoded.id)
-      .single();
-
-    if (error || !user) return res.status(401).json({ success: false, message: "User not found" });
-
-    // Attach user info including role
-    req.user = { id: user.id, role: user.role };
+    req.user = decoded;
+    // Attach user info to request
     next();
   } catch (err) {
     console.error("verifyToken error:", err);
-    return res.status(401).json({ success: false, message: "Invalid or expired token" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid or expired token" });
   }
 };
 
@@ -61,7 +62,9 @@ const verifyAdmin = (req, res, next) => {
 const verifyRoles = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: "Access denied." });
+      return res
+        .status(403)
+        .json({ success: false, message: "Access denied." });
     }
     next();
   };
