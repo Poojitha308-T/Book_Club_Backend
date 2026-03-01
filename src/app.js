@@ -14,11 +14,11 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Book Club Backend is running ",
-  });
-});
+// app.get("/", (req, res) => {
+//   res.status(200).json({
+//     message: "Book Club Backend is running ",
+//   });
+// });
 
 app.use("/api", routes); // Central routing
 
