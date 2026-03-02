@@ -15,5 +15,7 @@ router.get("/", verifyToken, goalsController.getUserGoals);
 // Get specific goal
 router.get("/goal", verifyToken, goalsController.getGoalById);
 
+router.delete("/", verifyToken, goalsController.deleteGoal);
+
 console.log("Goals Routes Loaded");
 module.exports = router;

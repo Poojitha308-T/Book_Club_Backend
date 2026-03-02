@@ -40,3 +40,11 @@ exports.getGoalById = async (userId, goalId) => {
   );
   return result.rows[0] || null;
 };
+
+exports.deleteGoal = async (userId, goalId) => {
+  const result = await pool.query(
+    `DELETE FROM goals WHERE id = $1 AND user_id = $2 RETURNING *`,
+    [goalId, userId]
+  );
+  return result.rows[0] || null;
+};

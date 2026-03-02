@@ -61,3 +61,25 @@ exports.getGoalById = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch goal" });
   }
 };
+
+// goals.controller.js
+exports.deleteGoal = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { goalId } = req.body; // frontend sends goalId in request body
+
+    if (!goalId) {
+      return res.status(400).json({ success: false, message: "Missing goalId" });
+    }
+
+    const deletedGoal = await goalsService.deleteGoal(userId, goalId);
+    if (!deletedGoal) {
+      return res.status(404).json({ success: false, message: "Goal not found" });
+    }
+
+    res.json({ success: true, goal: deletedGoal });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to delete goal" });
+  }
+};

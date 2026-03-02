@@ -54,11 +54,28 @@ exports.getUserAchievements = async (req, res) => {
 exports.addUserAchievement = async (req, res) => {
   try {
     const { userId, achievementId } = req.body;
-    const data = await achievementsService.addUserAchievement(userId, achievementId);
-    if (!data) {
-      return res.json({ success: false, message: "Achievement already earned" });
+
+    // ✅ Validate inputs
+    if (!userId || !achievementId) {
+      return res.status(400).json({
+        success: false,
+        message: "Both userId and achievementId are required",
+      });
     }
-    res.json({ success: true, data });
+
+    // Call service to insert achievement
+    const data = await achievementsService.addUserAchievement(userId, achievementId);
+
+    // Check if the user already has this achievement
+    if (!data) {
+      return res.status(400).json({
+        success: false,
+        message: "Achievement already earned by this user",
+      });
+    }
+
+    // Success
+    res.status(201).json({ success: true, data });
   } catch (err) {
     console.error("Add User Achievement Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
