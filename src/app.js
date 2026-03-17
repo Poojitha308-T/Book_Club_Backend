@@ -11,7 +11,8 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",                     // Local dev
+      "http://localhost:5173",
+      "https://book-club-frontend.pages.dev",                    
       "https://9a328140.book-club-frontend.pages.dev" // Cloudflare Pages frontend
     ],
     credentials: true,
