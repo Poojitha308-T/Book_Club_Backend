@@ -1,291 +1,284 @@
-Backend Deployment Link - https://book-club-backend-4.onrender.com
+# 📚 Book Club Management Platform – Backend
 
-📚 Book Club Platform — Backend
-🌟 Overview
+## Project Overview
 
-The Book Club Platform backend is built using Express.js and PostgreSQL.
-It provides a secure REST API that supports book suggestions, voting, discussions, reviews, reading progress tracking, meetings, notifications, and gamification features.
+The **Book Club Management Platform Backend** provides the core server-side functionality for the Book Club web application. It handles user authentication, book libraries, discussions, achievements, and dashboard statistics through RESTful APIs.
 
-The backend follows a modular architecture with role-based access control and relational data integrity.
+The backend is built using **Node.js and Express.js** with **PostgreSQL** as the database. It follows a modular architecture separating routes, controllers, middleware, and database queries to maintain clean code structure and scalability.
 
-🏗️ Tech Stack
+This backend enables secure communication between the frontend application and the database while ensuring authentication, authorization, and efficient data management.
 
-Node.js
+---
 
-Express.js
+# 🚀 Tech Stack
 
-PostgreSQL
+### Backend
+- Node.js
+- Express.js
 
-pg (raw SQL queries)
+### Database
+- PostgreSQL
 
-JWT Authentication
+### Authentication
+- JSON Web Tokens (JWT)
 
-bcrypt (password hashing)
+### API Communication
+- RESTful APIs
 
-UUID (uuid-ossp extension)
+### Middleware
+- CORS
+- Authentication Middleware
+- Error Handling Middleware
 
-🗄️ Database Design
+### Database Client
+- pg (PostgreSQL client for Node.js)
+- Raw SQL queries
 
-The system uses a relational PostgreSQL database with strong constraints and normalization.
+---
 
-Core Tables
-👤 Users
+# 📡 API Documentation
 
-Authentication & roles
+## Authentication APIs
 
-role → member | admin
+### Register User
+POST /api/auth/signup
 
-📖 Books
+Creates a new user account.
 
-Official approved books
-
-Linked to users (created_by)
-
-🗳️ Book Suggestions
-
-User-submitted book proposals
-
-Status → open | approved | rejected
-
-Community voting system
-
-👍 Suggestion Votes
-
-Prevents duplicate voting
-
-UNIQUE(user_id, suggestion_id)
-
-⭐ Reviews
-
-One review per user per book
-
-Rating (1–5)
-
-Review likes supported
-
-💬 Threads & Comments
-
-Book-based discussion system
-
-Nested comments via parent_id
-
-📊 Reading Progress
-
-Tracks user reading percentage per book
-
-🎯 Goals
-
-Reading targets (books/pages)
-
-Progress tracking
-
-📚 Library
-
-Personal book organization
-
-Status → reading | completed | to_read
-
-📅 Meetings
-
-Virtual book club meetings
-
-RSVP support
-
-🔔 Notifications
-
-Real-time event tracking
-
-Read/unread state
-
-🏆 Achievements
-
-Gamification system
-
-🔐 Authentication & Authorization
-
-Authentication is handled using JWT.
-
-Flow:
-
-User logs in
-
-Server generates JWT
-
-Token stored in frontend (localStorage)
-
-Protected routes use verifyToken middleware
-
-req.user contains:
-
-id
-
-role
-
-👥 Role-Based Access
-Role	Permissions
-Member	Suggest books, vote, review, comment
-Admin	Approve suggestions, manage books
-
-Example admin-only check:
-
-if (req.user.role !== "admin") {
-  return res.status(403).json({ message: "Admin only" });
+Request Body:
+{
+"name": "User Name",
+"email": "user@email.com",
+"password": "password"
 }
-🚀 API Endpoints
-🔐 Auth
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/users/me
-📖 Books
-GET    /api/books
-GET    /api/books/:id
-POST   /api/books           (admin only)
-DELETE /api/books/:id       (admin only)
-💡 Book Suggestions
-POST   /api/suggestions              (member)
-GET    /api/suggestions
-POST   /api/suggestions/:id/vote     (member)
-PATCH  /api/suggestions/:id/approve  (admin)
 
-Flow:
 
-Member suggests
+---
 
-Members vote
+### Login User
+POST /api/auth/login
 
-Admin approves
+Authenticates a user and returns a JWT token.
 
-Approved suggestion becomes official book
+---
 
-⭐ Reviews
-POST   /api/reviews
-GET    /api/reviews/:bookId
-POST   /api/reviews/:id/like
-💬 Discussions
-POST   /api/threads
-GET    /api/threads/:bookId
-POST   /api/comments
-📊 Reading Progress
-POST   /api/progress
-GET    /api/progress/:bookId
-🎯 Goals
-POST   /api/goals
-GET    /api/goals
-📚 Library
-POST   /api/library
-GET    /api/library
-📅 Meetings
-POST   /api/meetings
-GET    /api/meetings
-POST   /api/meetings/:id/rsvp
-🧠 Key Architectural Decisions
-1️⃣ Suggestion System Separation
+## Library APIs
 
-Suggestions are NOT directly added as books.
+### Add Book to Library
+POST /api/library
 
-Instead:
+Authorization: Required
 
-Stored in book_suggestions
+Adds a book to the user's personal library.
 
-Voted via suggestion_votes
+---
 
-Approved by admin
+### Remove Book from Library
+DELETE /api/library
 
-Then inserted into books
+Authorization: Required
 
-This matches the project requirement of a community-driven voting system.
+Removes a book from the user's library.
 
-2️⃣ Data Integrity
+---
 
-Foreign keys with ON DELETE CASCADE
+### Get User Library
+GET /api/library
 
-UNIQUE constraints for:
+Authorization: Required
 
-Votes
+Returns all books in the user's personal library.
 
-Reviews
+---
 
-Library entries
+## Discussions APIs
 
-Goal periods
+### Get Discussions
+GET /api/discussions
 
-CHECK constraints for roles and ratings
+Returns all discussion threads.
 
-3️⃣ Transaction Usage
+---
 
-Voting and approval use:
+### Create Discussion
+POST /api/discussions
 
-BEGIN
-COMMIT
-ROLLBACK
+Creates a new discussion thread.
 
-To ensure atomic operations.
+---
 
-🖥️ Setup Instructions
-1️⃣ Clone repository
-git clone <your-backend-repo-url>
-cd backend
-2️⃣ Install dependencies
-npm install
-3️⃣ Create .env
-PORT=5000
-DATABASE_URL=postgres://username:password@localhost:5432/bookclub
-JWT_SECRET=your_secret_key
-4️⃣ Enable PostgreSQL Extension
+## Achievements APIs
 
-Inside psql:
+### Get User Achievements
+GET /api/achievements
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-5️⃣ Run database schema
+Returns the achievements unlocked by the user.
 
-Execute your SQL schema file.
+---
 
-6️⃣ Start server
-npm run dev
+## Dashboard APIs
 
-Server runs on:
+### Get Dashboard Statistics
+GET /api/dashboard
 
-http://localhost:5000
-🛡️ Security Features
+Returns aggregated user statistics used in the dashboard.
 
-Password hashing with bcrypt
+---
 
-JWT authentication
+# 🗄 Database Schema Explanation
 
-Role-based route protection
+The application uses **PostgreSQL** to manage relational data.
 
-SQL parameterized queries (prevents SQL injection)
+---
 
-Token blacklist for logout security
+## Users Table
 
-📈 Scalability Considerations
+Stores user account information.
 
-Indexed email lookup
+| Column | Type | Description |
+|------|------|-------------|
+| id | UUID | Primary key |
+| name | VARCHAR | User name |
+| email | VARCHAR | Unique email |
+| password | TEXT | Hashed password |
+| avatar_url | TEXT | Profile image |
+| role | VARCHAR | User role |
 
-Indexed voting constraints
+---
 
-Normalized relational structure
+## Books Table
 
-Modular controller-based architecture
+Stores available books on the platform.
 
-🎓 Academic Strength
+| Column | Type |
+|------|------|
+| id | UUID |
+| title | VARCHAR |
+| author | VARCHAR |
+| genre | VARCHAR |
+| description | TEXT |
 
-This backend demonstrates:
+---
 
-REST API design
+## Library Table
 
-Relational database modeling
+Stores books added to a user's personal library.
 
-Transaction management
+| Column | Type |
+|------|------|
+| id | UUID |
+| user_id | UUID |
+| book_id | UUID |
+| status | VARCHAR |
+| progress | INTEGER |
 
-Role-based access control
+---
 
-Complex multi-table relationships
+## Discussions Table
 
-Community voting logic
+Stores discussion threads created by users.
 
-Gamification integration
+| Column | Type |
+|------|------|
+| id | UUID |
+| user_id | UUID |
+| title | VARCHAR |
+| content | TEXT |
+| created_at | TIMESTAMP |
 
-👩‍💻 Author
+---
 
-Poojitha Thadiboyina
+## Achievements Table
+
+Stores achievement definitions.
+
+| Column | Type |
+|------|------|
+| id | UUID |
+| name | VARCHAR |
+| description | TEXT |
+| criteria | TEXT |
+
+---
+
+## User Achievements Table
+
+Tracks achievements unlocked by users.
+
+| Column | Type |
+|------|------|
+| id | UUID |
+| user_id | UUID |
+| achievement_id | UUID |
+| unlocked_at | TIMESTAMP |
+
+---
+
+# ⚙ Installation Steps
+
+### 1. Clone the Repository
+
+---
+
+### 2. Navigate to Project Folder
+
+---
+
+### 3. Install Dependencies
+
+---
+
+### 4. Setup Environment Variables
+
+Create a `.env` file in the root directory.
+
+---
+
+### 5. Run the Server
+
+Server will run on:
+
+---
+
+# 🌐 Deployment Link
+
+Backend API Base URL:
+https://book-club-backend-5.onrender.com
+
+---
+
+# 📂 Project Structure
+src
+│
+├── routes
+├── controllers
+├── middleware
+├── config
+├── database
+└── server.js
+
+
+---
+
+# 🔐 Security Features
+
+- JWT-based authentication
+- Protected API routes
+- Password hashing
+- Middleware-based authorization
+
+---
+
+# 📊 Future Improvements
+
+- Real-time notifications
+- Advanced search functionality
+- Book recommendation system
+- Pagination and filtering improvements
+- Performance optimizations
+
+---
+
+# 👩‍💻 Author
+
+Developed as part of a full-stack project to build an interactive online book community platform.
