@@ -14,4 +14,12 @@ router.get("/me", verifyToken, achievementsController.getUserAchievements);
 router.post("/create", verifyToken, allowRoles("admin"), achievementsController.addUserAchievement);
 
 console.log("Achievements Routes Loaded");
+
+router.delete(
+  "/remove",
+  verifyToken,
+  allowRoles("admin"),
+  achievementsController.removeUserAchievement
+);
+
 module.exports = router;

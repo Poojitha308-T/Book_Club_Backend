@@ -1,4 +1,5 @@
 const achievementsService = require("./achievements.service");
+const db = require("../../config/db")
 
 exports.createAchievement = async (req, res) => {
   try {
@@ -79,5 +80,34 @@ exports.addUserAchievement = async (req, res) => {
   } catch (err) {
     console.error("Add User Achievement Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.removeUserAchievement = async (req, res) => {
+  try {
+    const { userId, achievementId } = req.body || {}; // ✅ safe destructuring
+
+    if (!userId || !achievementId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId and achievementId are required",
+      });
+    }
+
+    await db.query(
+      "DELETE FROM user_achievements WHERE user_id = $1 AND achievement_id = $2",
+      [userId, achievementId]
+    );
+
+    res.json({
+      success: true,
+      message: "Achievement removed",
+    });
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };

@@ -39,3 +39,14 @@ exports.addUserAchievement = async (userId, achievementId) => {
   );
   return result.rows[0];
 };
+
+exports.removeUserAchievement = async (userId, achievementId) => {
+  const result = await pool.query(
+    `DELETE FROM user_achievements 
+     WHERE user_id = $1 AND achievement_id = $2
+     RETURNING *`,
+    [userId, achievementId]
+  );
+
+  return result.rows[0];
+};
